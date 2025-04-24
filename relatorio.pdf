@@ -1,0 +1,59 @@
+
+### 📄 Relatório Técnico – Chat Seguro
+
+**Disciplina:** PE-CCM8N - Criptografia e Segurança  
+**Alunos:**  
+- Ricardo – RA: 1125087  
+- Tomas Biasotto – RA:- 1125129
+---
+
+### 1. Objetivo do Projeto
+
+Implementar um chat seguro entre dois usuários que garanta os pilares de **confidencialidade**, **integridade** e **autenticidade**, aplicando os conhecimentos estudados na disciplina.
+
+---
+
+### 2. Tecnologias e Algoritmos Utilizados
+
+- **Linguagem:** Python 3
+- **Comunicação:** Sockets TCP
+- **Criptografia Simétrica:** AES em modo CFB
+- **Verificação de Integridade:** HMAC com SHA-256
+- **Derivação de Chave:** PBKDF2 com SHA-256
+- **Biblioteca utilizada:** `cryptography`
+
+---
+
+### 3. Funcionamento do Sistema
+
+- Um servidor intermediário conecta dois clientes.
+- Cada cliente insere uma **senha compartilhada**.
+- A senha é transformada em uma chave AES com `PBKDF2HMAC`.
+- Ao enviar uma mensagem, o cliente:
+  - Criptografa a mensagem com AES + IV aleatório
+  - Calcula um HMAC com SHA-256 sobre `IV + ciphertext`
+  - Envia `IV + ciphertext + HMAC`
+- O receptor:
+  - Verifica o HMAC
+  - Descriptografa e exibe a mensagem
+
+---
+
+### 4. Testes Realizados
+
+- Testado com dois terminais simultâneos.
+- Mensagens curtas e longas foram trocadas com sucesso.
+- O sistema detecta mensagens corrompidas e exibe erro.
+- A confidencialidade e integridade foram mantidas.
+
+---
+
+### 5. Conclusão
+
+O sistema desenvolvido cumpre os objetivos propostos, garantindo:
+- **Confidencialidade:** mensagens são criptografadas ponta a ponta
+- **Integridade:** HMAC detecta qualquer modificação nos dados
+- **Simetria:** ambos os lados usam a mesma chave derivada da senha
+
+A arquitetura pode ser expandida para múltiplos usuários, GUI e autenticação via certificados no futuro.
+
