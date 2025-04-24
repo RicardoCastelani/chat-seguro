@@ -1,74 +1,67 @@
 import socket
 import threading
-import os
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import hashes, hmac
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from Crypto.Cipher import AES
+from Crypto.Hash import HMAC, SHA256
+from Crypto.Random import get_random_bytes
 
-# Gera chave AES a partir de senha
-def gerar_chave_aes(senha):
-    salt = b'salt_fixo'  # Em produção, use um salt aleatório seguro
-    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000)
-    return kdf.derive(senha.encode())
+PORT = 5000
+KEY = b'superseguranca123'
+IV = b'16bytesivpraaes1'
 
-# Criptografa com AES e retorna IV + ciphertext + HMAC
-def criptografar(mensagem, chave):
-    iv = os.urandom(16)
-    cipher = Cipher(algorithms.AES(chave), modes.CFB(iv))
-    encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(mensagem.encode()) + encryptor.finalize()
+def encrypt_message(message):
+    cipher = AES.new(KEY, AES.MODE_CFB, IV)
+    ciphertext = cipher.encrypt(message.encode())
+    h = HMAC.new(KEY, digestmod=SHA256)
+    h.update(ciphertext)
+    return ciphertext + b'||' + h.digest()
 
-    h = hmac.HMAC(chave, hashes.SHA256())
-    h.update(iv + ciphertext)
-    tag = h.finalize()
-    return iv + ciphertext + tag
+def decrypt_message(data):
+    try:
+        ciphertext, mac = data.split(b'||')
+        h = HMAC.new(KEY, digestmod=SHA256)
+        h.update(ciphertext)
+        h.verify(mac)
+        cipher = AES.new(KEY, AES.MODE_CFB, IV)
+        return cipher.decrypt(ciphertext).decode()
+    except:
+        return "[Mensagem alterada ou inválida]"
 
-# Descriptografa com verificação de HMAC
-def descriptografar(dados, chave):
-    iv = dados[:16]
-    ciphertext = dados[16:-32]
-    tag = dados[-32:]
-
-    h = hmac.HMAC(chave, hashes.SHA256())
-    h.update(iv + ciphertext)
-    h.verify(tag)
-
-    cipher = Cipher(algorithms.AES(chave), modes.CFB(iv))
-    decryptor = cipher.decryptor()
-    return decryptor.update(ciphertext) + decryptor.finalize()
-
-# Envia mensagem criptografadapip install cryptography
-
-def enviar(sock, chave):
-    while True:
-        msg = input("> Você: ")
-        criptografada = criptografar(msg, chave)
-        sock.send(criptografada)
-
-# Recebe e descriptografa mensagens
-def receber(sock, chave):
+def receive(sock):
     while True:
         try:
-            dados = sock.recv(4096)
-            msg = descriptografar(dados, chave).decode()
-            print(f"\n< Outro: {msg}\n> Você: ", end="")
-        except Exception as e:
-            print("\n[!] Erro ou desconexão.")
+            data = sock.recv(4096)
+            if not data:
+                break
+            print("\n[SERVIDOR]:", decrypt_message(data))
+        except:
+            print("\n[!] Erro ao receber a mensagem.")
             break
 
-# Execução do cliente
+def send(sock):
+    while True:
+        try:
+            msg = input("[Você]: ")
+            encrypted = encrypt_message(msg)
+            sock.sendall(encrypted)
+        except:
+            break
+
 def main():
-    host = 'localhost'
-    porta = 5000
+    sock = socket.socket()
+    sock.connect(('localhost', PORT))
+    
+    response = sock.recv(1024).decode()
+    print(response)
+    password = input("> ").strip()
+    sock.sendall(password.encode())
 
-    senha_compartilhada = input("Digite a senha compartilhada com seu colega: ")
-    chave_aes = gerar_chave_aes(senha_compartilhada)
+    auth = sock.recv(1024).decode()
+    print(auth)
+    if "incorreta" in auth:
+        return
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((host, porta))
-
-    threading.Thread(target=receber, args=(sock, chave_aes), daemon=True).start()
-    enviar(sock, chave_aes)
+    threading.Thread(target=receive, args=(sock,)).start()
+    threading.Thread(target=send, args=(sock,)).start()
 
 if __name__ == "__main__":
     main()
