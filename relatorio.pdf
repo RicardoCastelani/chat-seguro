@@ -1,52 +1,83 @@
+Disciplina: PE-CCM8N - Criptografia e Segurança
+Alunos:
 
-### 📄 Relatório Técnico – Chat Seguro
+    Ricardo Castelani — RA: 1125087
 
-**Disciplina:** PE-CCM8N - Criptografia e Segurança  
-**Alunos:**  
-- Ricardo – RA: 1125087  
-- Tomas Biasotto – RA:- 1125129
+    Tomas Biasotto — RA: 1125129
 
-### **1. Tecnologias utilizadas**
+1. Tecnologias e Algoritmos Utilizados
 
-- Linguagem: Python 3  
-- Biblioteca criptográfica: PyCryptodome  
-- Comunicação: Sockets TCP  
-- Threads para permitir envio e recebimento simultâneos
+    Linguagem de Programação: Python 3
 
----
+    Biblioteca Criptográfica: PyCryptodome
 
-### **2. Algoritmos aplicados**
+    Algoritmos de Criptografia:
 
-- **AES (Advanced Encryption Standard)** — modo CFB: garante **confidencialidade**.
-- **HMAC com SHA-256** — garante **integridade** das mensagens.
-- **Senha compartilhada** — autentica os usuários no início da conexão.
+        AES (AES-256, modo CFB) — garante confidencialidade
 
----
+        HMAC com SHA-256 — garante integridade
 
-### **3. Funcionamento do sistema**
+    Rede: Comunicação via sockets TCP
 
-O sistema permite que dois usuários se comuniquem por meio de um chat em tempo real. Antes de iniciar a troca de mensagens, o cliente deve informar a senha correta. Se estiver incorreta, a conexão é encerrada.
+    Execução Paralela: Utilização de threading para envio e recebimento simultâneo
 
-Após a autenticação, cada mensagem é:
-- Criptografada com AES.
-- Assinada com HMAC.
-- Enviada via socket TCP.
+2. Descrição do Funcionamento do Sistema
 
-No recebimento, a integridade é verificada antes da descriptografia.
+O projeto implementa um chat seguro em arquitetura cliente-servidor, onde:
 
----
+    O servidor é iniciado e aguarda conexões.
 
-### **4. Testes realizados**
+    O cliente se conecta ao servidor e recebe um prompt para digitar a senha.
 
-- ✅ Envio e recebimento simultâneo entre cliente e servidor.
-- ✅ Tentativa de autenticação com senha incorreta (conexão encerrada).
-- ✅ Modificação da mensagem manualmente (HMAC invalida o conteúdo).
-- ✅ Testes entre dois computadores diferentes via IP.
+    Se a senha fornecida pelo cliente for correta, a conexão é mantida; se estiver incorreta, ela é encerrada.
 
----
+    Após autenticação:
 
-### **5. Conclusão**
+        Toda mensagem enviada é criptografada com AES e assinada com HMAC.
 
-O trabalho permitiu aplicar conceitos teóricos de criptografia em um cenário prático e funcional. A comunicação segura entre os usuários foi alcançada com sucesso, respeitando os pilares de segurança: confidencialidade, integridade e autenticação.
+        A mensagem é enviada com HMAC junto, e o receptor valida a integridade antes da descriptografia.
 
----
+    O sistema permite envio e recebimento simultâneo de mensagens graças ao uso de threads.
+
+3. Testes Realizados
+✅ Teste 1: Autenticação com senha correta
+
+    Descrição: Cliente inseriu a senha "senha123" ao conectar-se.
+
+    Resultado: Acesso concedido com a mensagem "Autenticado com sucesso!".
+
+❌ Teste 2: Autenticação com senha incorreta
+
+    Descrição: Cliente inseriu senha incorreta (teste feito anteriormente).
+
+    Resultado: Conexão encerrada imediatamente com mensagem "Senha incorreta".
+
+✅ Teste 3: Troca de mensagens entre servidor e cliente
+
+    Descrição: Mensagens como "teste", "ss", "te", "ett" foram enviadas de ambos os lados.
+
+    Resultado: Mensagens criptografadas, recebidas e descriptografadas corretamente no outro lado.
+
+✅ Teste 4: Comando de saída
+
+    Descrição: Cliente digitou sair.
+
+    Resultado: Cliente e servidor encerraram a conexão de forma limpa.
+
+✅ Teste 5: Encerramento do servidor
+
+    Descrição: Após encerrar o cliente, o servidor detectou a desconexão.
+
+    Resultado: Mensagem de erro foi tratada (WinError 10054) e o servidor foi encerrado com sucesso.
+
+4. Conclusão
+
+O sistema desenvolvido cumpre os objetivos propostos na disciplina, oferecendo:
+
+    Confidencialidade, com criptografia AES-256
+
+    Integridade, com verificação via HMAC SHA-256
+
+    Autenticação, via senha no início da conexão
+
+Além disso, os testes demonstraram que o sistema é estável, bidirecional e seguro. Está pronto para possíveis expansões, como multiusuários ou interfaces gráficas.
