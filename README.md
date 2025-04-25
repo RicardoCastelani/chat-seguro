@@ -1,24 +1,17 @@
 # Chat Seguro - Criptografia e Segurança
 
-## Integrantes
-- [Ricardo] RA [1125087]
-- [Tomas] RA [1125129]
+Este projeto implementa um chat seguro com os pilares de **confidencialidade**, **integridade** e **autenticação**.
 
-## 📘 Descrição
-Este projeto é um sistema de chat seguro que garante **confidencialidade** e **integridade** das mensagens trocadas entre dois usuários.
+## 🔐 Tecnologias usadas
 
-Utiliza criptografia **simétrica (AES)** e **HMAC com SHA-256** para autenticação e verificação da integridade das mensagens.
+- Linguagem: Python 3
+- Biblioteca: PyCryptodome (AES, HMAC, SHA-256)
+- Comunicação: Sockets TCP
+- Threads para comunicação simultânea
 
-## 🔐 Tecnologias e Algoritmos Utilizados
-- **Python 3**
-- **Sockets TCP** (para comunicação entre clientes e servidor)
-- **AES (modo CFB)** – Criptografia simétrica
-- **HMAC (SHA-256)** – Garantia de integridade
-- **PBKDF2HMAC** – Derivação de chave a partir de senha compartilhada
-- **Biblioteca `cryptography`**
+## 📦 Requisitos
 
-## ⚙️ Como Executar
+Instale a biblioteca necessária com:
 
-1. Instale a biblioteca necessária:
 ```bash
-pip install cryptography
+pip install pycryptodome
